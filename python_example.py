@@ -264,7 +264,7 @@ def actions4():
                 return f'課堂時間衝突 \n{results}'
             
             
-    # 確認課程是否為該學生的本科系必修課程，並進行擋修的動作
+    # 確認課程是否為該學生的本科系必修課程，不是的話就進行擋修的動作
     cursor.execute("SELECT cou_id FROM course WHERE cou_id='{0}' AND cou_dept=(SELECT stu_dept FROM student WHERE stu_id='{1}') AND cou_necessary='是'".format(c_id, s_id))
     required_course = cursor.fetchone()
 

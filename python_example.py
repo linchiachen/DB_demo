@@ -264,12 +264,21 @@ def actions4():
                 return f'課堂時間衝突 \n{results}'
             
             
-    # 確認課程是否為該學生的本科系必修課程，不是的話就進行擋修的動作
+    # 確認課程是否為該學生的本科系必修課程，並進行擋修的動作
     cursor.execute("SELECT cou_id FROM course WHERE cou_id='{0}' AND cou_dept=(SELECT stu_dept FROM student WHERE stu_id='{1}') AND cou_necessary='是'".format(c_id, s_id))
     required_course = cursor.fetchone()
 
     if required_course is None:
         return f'加選失敗，您只能加選本科系的必修課程\n{results}'
+    
+
+    # 檢查學生是否已經選擇了同名的課程
+    cursor.execute("SELECT COUNT(*) FROM curriculum AS c INNER JOIN course AS co ON c.cou_id = co.cou_id WHERE c.stu_id='{0}' AND co.cou_name=(SELECT cou_name FROM course WHERE cou_id='{1}')".format(s_id, c_id))
+    duplicate_course_count = cursor.fetchone()[0]
+
+    if duplicate_course_count > 0:
+        return f'加選失敗，您已經選擇了同名的課程\n{results}'
+
 
     #得到某個學生目前總學分
     cursor.execute( "select sum(cou_credit) from ( select curriculum.stu_id ,course.cou_id, course.cou_name, course.cou_credit from curriculum left join course on course.cou_id=curriculum.cou_id where stu_id='{0}' GROUP BY course.cou_id ) as credit_count".format(s_id,c_id) )
